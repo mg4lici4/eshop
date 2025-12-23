@@ -1,0 +1,35 @@
+﻿using EShop.Application.Interfaces.Repositories;
+using EShop.Domain.Entities;
+using EShop.Infraestructure.Persistence;
+using Microsoft.EntityFrameworkCore;
+
+namespace EShop.Infraestructure.Repositories
+{
+    public class SesionRepository : ISesionRepository
+    {
+        private readonly EShopDbContext _eShopDbContext;
+        public SesionRepository(EShopDbContext eShopDbContext)
+        {
+            _eShopDbContext = eShopDbContext;
+        }
+
+        public async Task<SesionEntity> BuscarPorIdUsuarioAsync(long idUsuario)
+        {
+            var sesionEntity = await _eShopDbContext.Sesiones.AsNoTracking().FirstOrDefaultAsync(s => s.IdUsuario == idUsuario);
+            return sesionEntity!;
+        }
+
+        public async Task<SesionEntity> BuscarPorJtiAsync(string jti)
+        {
+            var sesionEntity = await _eShopDbContext.Sesiones.AsNoTracking().FirstOrDefaultAsync(s => s.Jti == jti);
+            return sesionEntity!;
+        }
+
+        public async Task<bool> RegistrarAsync(SesionEntity sesionEntity)
+        {
+            await _eShopDbContext.Sesiones.AddAsync(sesionEntity);
+            var resultado = await _eShopDbContext.SaveChangesAsync();
+            return resultado > 0;
+        }
+    }
+}
