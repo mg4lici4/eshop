@@ -1,7 +1,6 @@
 ﻿using EShop.Application.Dtos.Login;
-using EShop.Application.Dtos.Persona;
 using EShop.Application.Features.Login.Commands;
-using EShop.Application.Features.Persona.Commands;
+using EShop.Application.Features.Login.Queries;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
@@ -22,6 +21,18 @@ namespace EShop.Api.Controllers
         public async Task<IActionResult> ValidarCredenciales(ValidarCredencialesDto validarCredencialesDto)
         {
             var command = new LoginCredencialesCommand() { LoginCredencialesDto = validarCredencialesDto };
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+                return Ok(result.Value);
+
+            return StatusCode(result.StatusCode, result.Value);
+        }
+
+        [HttpPost("validar", Name = "Validar otp")]
+        public async Task<IActionResult> ValidarOtp(ValidarOtpDto validarOtpDto)
+        {
+            var command = new ValidarOtpQuery() { ValidarOtpDto = validarOtpDto };
             var result = await _mediator.Send(command);
 
             if (result.IsSuccess)

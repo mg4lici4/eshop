@@ -6,6 +6,7 @@ namespace EShop.Infraestructure.Persistence
     public class EShopDbContext(DbContextOptions<EShopDbContext> options) : DbContext(options)
     {
         public DbSet<PersonaEntity> Personas { get; set; }
+        public DbSet<SegundoFAEntity> SegundosFA { get; set; }
         public DbSet<UsuarioEntity> Usuarios { get; set; }
         public DbSet<OrigenEntity> Origenes { get; set; }
         public DbSet<SesionEntity> Sesiones { get; set; }
@@ -99,6 +100,36 @@ namespace EShop.Infraestructure.Persistence
 
                 entity.HasIndex(e => e.Nombre)
                     .IsUnique();
+            });
+
+            modelBuilder.Entity<SegundoFAEntity>(entity =>
+            {
+                entity.ToTable("SEGUNDO_FA");
+                entity.HasKey(e => e.Id2FA);
+
+                entity.Property(e => e.Id2FA)
+                    .HasColumnName("ID_SEGUNDO_FA")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.IdUsuario)
+                    .HasColumnName("ID_USUARIO")
+                    .IsRequired();
+
+                entity.Property(e => e.Contrasenia)
+                    .HasColumnName("SECRETO")
+                    .HasMaxLength(64)
+                    .IsRequired();
+
+                entity.Property(e => e.Activo)
+                    .HasColumnName("ACTIVO")
+                    .IsRequired();
+
+                entity.Property(e => e.FechaCreacion)
+                    .HasColumnName("FECHA_CREACION")
+                    .HasDefaultValueSql("SYSDATE");
+
+                entity.Property(e => e.FechaActualizacion)
+                    .HasColumnName("FECHA_ACTUALIZACION");
             });
 
             modelBuilder.Entity<SesionEntity>(entity =>

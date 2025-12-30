@@ -11,6 +11,7 @@ namespace EShop.Application.Features.Usuario.Commands
         public ActivarUsuarioHandler(IUsuarioRepository usuarioRepository)
         {
             _usuarioRepository = usuarioRepository;
+
         }
         public async Task<Result<ResponseModelDto>> Handle(ActivarUsuarioCommand request, CancellationToken cancellationToken)
         {

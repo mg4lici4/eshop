@@ -27,6 +27,7 @@ namespace EShop.Infraestructure
             services.AddScoped<IPersonaRepository, PersonaRepository>();
             services.AddScoped<IOrigenRepository, OrigenRepository>();
             services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+            services.AddScoped<ISegundoFARepository, SegundoFARepository>();
             services.AddScoped<ISesionRepository, SesionRepository>();
 
             return services;
