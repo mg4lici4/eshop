@@ -13,12 +13,27 @@ namespace EShop.Infraestructure.Repositories
         {
             _eShopDbContext = eShopDbContext;
         }
+
+        public async Task<bool> ActualizarAsync(SegundoFAEntity segundoFAEntity)
+        {
+            segundoFAEntity.FechaActualizacion = DateTime.Now;
+
+            _eShopDbContext.SegundosFA.Entry(segundoFAEntity).State = EntityState.Modified;
+            var result = await _eShopDbContext.SaveChangesAsync();
+            return result > 0;
+        }
+
         public async Task<SegundoFAEntity> BuscarPorIdUsuario(long idUsuario)
         {
             var segundoFAEntity = await _eShopDbContext.SegundosFA.AsNoTracking().FirstOrDefaultAsync(s => s.IdUsuario == idUsuario);
             return segundoFAEntity!;
         }
 
+        public async Task<IEnumerable<SegundoFAEntity>> ObtenerTodosPorIdUsuario(long idUsuario)
+        {
+            var segundoFAEntities = await _eShopDbContext.SegundosFA.AsNoTracking().Where(s => s.IdUsuario == idUsuario).ToListAsync();
+            return segundoFAEntities!;
+        }
         public async Task<bool> RegistrarAsync(SegundoFAEntity segundoFAEntity)
         {
             await _eShopDbContext.SegundosFA.AddAsync(segundoFAEntity);

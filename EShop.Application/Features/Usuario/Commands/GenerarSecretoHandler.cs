@@ -1,5 +1,6 @@
 ﻿using EShop.Application.Common;
 using EShop.Application.Dtos;
+using EShop.Application.Dtos.Usuario;
 using EShop.Application.Interfaces.Repositories;
 using EShop.Domain.Entities;
 using MediatR;
@@ -22,6 +23,7 @@ namespace EShop.Application.Features.Usuario.Commands
         {
             try
             {
+                
                 string issuer = "eshop";
                 var usuarioEntity = await _usuarioRepository.BuscarPorIdPersonaAsync(request.GenerarSecretoDto.IdPersona);
 
@@ -30,22 +32,37 @@ namespace EShop.Application.Features.Usuario.Commands
 
                 string base32Secret = Base32Encoding.ToString(KeyGeneration.GenerateRandomKey(40));
 
-                var segundoFAEntity = new SegundoFAEntity()
+                var segundoFARegistroEntity = await _segundoFARepository.BuscarPorIdUsuario(usuarioEntity.IdUsuario);
+                if(segundoFARegistroEntity is not null)
                 {
-                    Activo = 0,
-                    Contrasenia = base32Secret,
-                    IdUsuario = usuarioEntity.IdUsuario
-                };
-                await _segundoFARepository.RegistrarAsync(segundoFAEntity);
+                    if(segundoFARegistroEntity.Activo == 1)
+                        return Result<ResponseModelDto>.Failure(new ResponseModelDto(mensaje: "Ya existe un registro de segundo factor de autenticación."), System.Net.HttpStatusCode.InternalServerError);
 
+                    segundoFARegistroEntity.Contrasenia = base32Secret;
+                    await _segundoFARepository.ActualizarAsync(segundoFARegistroEntity);
+                }
+                else
+                {
+                    var segundoFAEntity = new SegundoFAEntity()
+                    {
+                        Activo = 0,
+                        Contrasenia = base32Secret,
+                        IdUsuario = usuarioEntity.IdUsuario
+                    };
+                    await _segundoFARepository.RegistrarAsync(segundoFAEntity);
+                }    
 
                 string label = $"{issuer}:{usuarioEntity.Nombre}";
                 string issuerParam = HttpUtility.UrlEncode(issuer);
                 string accountParam = HttpUtility.UrlEncode(usuarioEntity.Nombre);
 
-                string otpauthUri =
-                    $"otpauth://totp/{label}?secret={base32Secret}&issuer={issuerParam}&algorithm=SHA512&digits=6&period=30";
-                return Result<ResponseModelDto>.Success(new ResponseModelDto(datos: otpauthUri));
+                GenerarSecretoResponseDto generarSecretoResponseDto = new()
+                {
+                    IdUsuario = usuarioEntity.IdUsuario,
+                    OtpauthUri = $"otpauth://totp/{label}?secret={base32Secret}&issuer={issuerParam}&algorithm=SHA512&digits=6&period=30",
+                };
+
+                return Result<ResponseModelDto>.Success(new ResponseModelDto(datos: generarSecretoResponseDto));
             }
             catch (Exception ex)
             {

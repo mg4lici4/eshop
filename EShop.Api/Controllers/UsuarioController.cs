@@ -39,10 +39,22 @@ namespace EShop.Api.Controllers
             return StatusCode(result.StatusCode, result.Value);
         }
 
-        [HttpPost("secreto", Name = "Generar secreto")]
+        [HttpPost("segundofa", Name = "Generar secreto")]
         public async Task<IActionResult> GenerarSecreto(GenerarSecretoDto generarSecretoDto)
         {
             var command = new GenerarSecretoCommand() { GenerarSecretoDto = generarSecretoDto };
+            var result = await _mediator.Send(command);
+
+            if (result.IsSuccess)
+                return Ok(result.Value);
+
+            return StatusCode(result.StatusCode, result.Value);
+        }
+
+        [HttpPost("segundofa/activar", Name = "Validar otp")]
+        public async Task<IActionResult> ValidarOtp(ActivarSegundoFaDto activarSegundoFaDto)
+        {
+            var command = new SegundoFaActivarCommand() { ActivarSegundoFaDto = activarSegundoFaDto };
             var result = await _mediator.Send(command);
 
             if (result.IsSuccess)
